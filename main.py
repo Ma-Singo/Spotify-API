@@ -3,10 +3,8 @@ import base64
 import requests
 
 
-
 client_id = config('SPOTIFY_CLIENT_ID', cast=str)
 client_secret = config('SPOTIFY_CLIENT_SECRET', cast=str)
-
 
 
 class SpotifyClient:
@@ -34,14 +32,14 @@ class SpotifyClient:
         else:
             raise Exception(response.status_code, response.json())
 
+
     def get_access_token(self):
         client_credentials = self.get_client_credentials()
         access_token = client_credentials['access_token']
         return access_token
 
     def get_auth_header(self):
-        client_credentials = self.get_client_credentials()
-        access_token = client_credentials['access_token']
+        access_token = self.get_access_token()
         return {
             "Authorization": f"Bearer {access_token}"
 
@@ -87,30 +85,15 @@ class SpotifyClient:
                 }
 
         else:
-            self.get_track()
-
-    def play_music(self):
-        headers = self.get_auth_header()
-        url = "https://api.spotify.com/v1/player"
-        response = requests.get(url, headers=headers)
+            return self.get_track()
 
 
-        if response.status_code == 200:
-            return response.json()
-        else:
-            raise Exception(response.status_code, response.json())
-
-
-
-
-    def getProfile(self, access_token=None):
+    def get_profile(self):
         access_token = self.get_access_token()
-
+        headers = self.get_auth_header()
+        url = "https://api.spotify.com/v1/me"
         if access_token:
-            url = "https://api.spotify.com/v1/me"
-            headers = {
-                "Authorization": f"Bearer {access_token}"
-            }
+
             response = requests.get(url, headers=headers)
             if response.ok:
                 return response.json()
@@ -120,11 +103,13 @@ class SpotifyClient:
             raise Exception("Access Token Error")
 
 
+
 if __name__ == '__main__':
     spotify = SpotifyClient(client_id, client_secret)
-    #print(spotify.get_access_token())
+    print(spotify.get_access_token())
     print(spotify.search_for_artist())
     print(spotify.search_for_track())
     print(spotify.get_track())
+
 
 

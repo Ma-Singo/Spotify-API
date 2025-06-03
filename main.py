@@ -1,17 +1,12 @@
 from decouple import config
-#from dotenv import load_dotenv
 import base64
 import requests
-import json
 
-#load_dotenv()
 
 
 client_id = config('SPOTIFY_CLIENT_ID', cast=str)
 client_secret = config('SPOTIFY_CLIENT_SECRET', cast=str)
 
-#client_id = os.getenv('SPOTIFY_CLIENT_ID')
-#client_secret = os.getenv('SPOTIFY_CLIENT_SECRET')
 
 
 class SpotifyClient:

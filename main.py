@@ -47,39 +47,49 @@ class SpotifyClient:
 
         }
 
-    def search_for_artist(self, artist_name: str):
+    def search_for_artist(self):
+        artist_name: str = input("Search by  artist name: ")
         headers = self.get_auth_header()
         url = "https://api.spotify.com/v1/search"
         query = f"?q={artist_name}&type=artist&limit=1"
 
         query_url = f"{url}{query}"
         response = requests.get(query_url, headers=headers)
+        artist_id = response.json()["artists"]["items"][0]["id"]
+        return artist_id
 
-        return response.json()['artists']['items'][0]['id']
-
-    def search_for_track(self, track_name: str):
+    def search_for_track(self):
+        track_name: str = input("Search by track name: ")
         headers = self.get_auth_header()
         url = "https://api.spotify.com/v1/search"
         query = f"?q={track_name}&type=track&limit=1"
         query_url = f"{url}{query}"
         response = requests.get(query_url, headers=headers)
-        return response.json()['tracks']['items'][0]['id']
+        track_id = response.json()['tracks']['items'][0]['id']
+        return track_id
 
-    def get_track(self, track_id=None):
+    def get_track(self):
+        track_id = self.search_for_track()
         headers = self.get_auth_header()
         if track_id:
             url = f"https://api.spotify.com/v1/tracks/{track_id}"
             response = requests.get(url, headers=headers)
-            if response.status_code == 200:
-                yield response.json()
-            else:
+            if response.status_code != 200:
                 raise Exception(response.status_code, response.json())
-        else:
-            track_id = self.search_for_track("if")
-            print(track_id)
-            self.get_track(track_id=track_id)
 
-    def play_music(self, track_id: str = ""):
+            else:
+                result = response.json()
+                return {
+                    "id": track_id,
+                    "name": result["name"],
+                    "artists": result["artists"],
+                    "artist_name": result["artists"][0]["name"],
+                }
+
+        else:
+            self.get_track()
+
+    def play_music(self):
         headers = self.get_auth_header()
         url = "https://api.spotify.com/v1/player"
         response = requests.get(url, headers=headers)
@@ -113,8 +123,8 @@ class SpotifyClient:
 if __name__ == '__main__':
     spotify = SpotifyClient(client_id, client_secret)
     #print(spotify.get_access_token())
-    #print(spotify.search_for_artist("Davido"))
-    #print(spotify.search_for_track("IF"))
-    print(list(spotify.get_track()))
+    print(spotify.search_for_artist())
+    print(spotify.search_for_track())
+    print(spotify.get_track())
 
 
